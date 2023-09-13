@@ -4,10 +4,21 @@ CREATE TABLE `User` (
     `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `referalId` VARCHAR(191) NULL,
-    `role` ENUM('BASIC', 'UPGRADED', 'ADMIN') NOT NULL DEFAULT 'BASIC',
+    `role` ENUM('BASIC', 'UPGRADED', 'ADMIN', 'SUPERUSER') NOT NULL DEFAULT 'BASIC',
 
     UNIQUE INDEX `User_username_key`(`username`),
     UNIQUE INDEX `User_referalId_key`(`referalId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Blog` (
+    `id` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `createAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updateAt` DATETIME(3) NOT NULL,
+    `authorId` VARCHAR(191) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -52,9 +63,20 @@ CREATE TABLE `UserExperience` (
     `id` VARCHAR(191) NOT NULL,
     `startDate` DATETIME(3) NOT NULL,
     `endDate` DATETIME(3) NOT NULL,
+    `company` VARCHAR(191) NOT NULL,
+    `position` VARCHAR(191) NOT NULL,
     `userBackgroundId` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `_favoriteBlog` (
+    `A` VARCHAR(191) NOT NULL,
+    `B` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `_favoriteBlog_AB_unique`(`A`, `B`),
+    INDEX `_favoriteBlog_B_index`(`B`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -70,6 +92,9 @@ CREATE TABLE `_SkillSetToUserBackground` (
 ALTER TABLE `User` ADD CONSTRAINT `User_referalId_fkey` FOREIGN KEY (`referalId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Blog` ADD CONSTRAINT `Blog_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `UserInfo` ADD CONSTRAINT `UserInfo_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -77,6 +102,12 @@ ALTER TABLE `UserBackground` ADD CONSTRAINT `UserBackground_userId_fkey` FOREIGN
 
 -- AddForeignKey
 ALTER TABLE `UserExperience` ADD CONSTRAINT `UserExperience_userBackgroundId_fkey` FOREIGN KEY (`userBackgroundId`) REFERENCES `UserBackground`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_favoriteBlog` ADD CONSTRAINT `_favoriteBlog_A_fkey` FOREIGN KEY (`A`) REFERENCES `Blog`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `_favoriteBlog` ADD CONSTRAINT `_favoriteBlog_B_fkey` FOREIGN KEY (`B`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_SkillSetToUserBackground` ADD CONSTRAINT `_SkillSetToUserBackground_A_fkey` FOREIGN KEY (`A`) REFERENCES `SkillSet`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

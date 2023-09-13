@@ -19,11 +19,27 @@ model User {
   userInfo       UserInfo?
   userBackground UserBackground?
 
+  referalUser   User?   @relation("reference", fields: [referalId], references: [id]) // ใครแนะนำมา
   referalId     String? @unique
-  referalUser   User?   @relation("reference", fields: [referalId], references: [id])
-  referenceUser User[]  @relation("reference")
+  referenceUser User[]  @relation("reference") // แนะนำใครบ้าง?
 
   role Role @default(BASIC)
+
+  createdBlog Blog[] @relation("myBlog")
+
+  favoriteBlog Blog[] @relation("favoriteBlog")
+}
+
+model Blog {
+  id       String   @id @default(uuid())
+  title    String
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  author   User   @relation("myBlog", fields: [authorId], references: [id])
+  authorId String
+
+  favoriteUsers User[] @relation("favoriteBlog")
 }
 
 model UserInfo {
@@ -49,7 +65,7 @@ model UserBackground {
 
   skills SkillSet[]
 
-  UserExperience UserExperience[]
+  userExperiences UserExperience[]
 }
 
 model SkillSet {
@@ -63,6 +79,8 @@ model UserExperience {
   id        String   @id @default(uuid())
   startDate DateTime
   endDate   DateTime
+  company   String
+  position  String
 
   userBackground   UserBackground @relation(fields: [userBackgroundId], references: [id])
   userBackgroundId String
@@ -72,4 +90,5 @@ enum Role {
   BASIC
   UPGRADED
   ADMIN
+  SUPERUSER
 }

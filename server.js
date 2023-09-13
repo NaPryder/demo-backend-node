@@ -30,9 +30,10 @@ app.post("/api/users/login", (req, res) => {
 
 app.get("/", async (req, res) => {
   const user = await prisma.user.findFirst()
-  console.log('user :>> ', user);
   res.send(`<h1>Hello ${user.username}</h1>`);
 });
+
+
 app.use("/user", userRoutes)
 // app.use("/blog", userRoutes)
 
