@@ -1,0 +1,48 @@
+version: "3.9"
+
+volumes:
+  postgres_data:
+  storage_data:
+
+services:
+  # ============================================================================================== SHARED
+
+  redis:
+    restart: always
+    image: "redis:alpine"
+
+  db:
+    restart: always
+    image: "postgres:alpine"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      # - POSTGRES_HOST_AUTH_METHOD=trust
+        - POSTGRES_USER=$DB_USER
+        - POSTGRES_PASSWORD=$DB_PASSWORD
+    ports:
+      - "127.0.0.1:5400:$DB_PORT"  
+  
+
+  backend:
+    stdin_open: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-node
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    restart: always
+    # volumes:
+    #   -backend:backend
+
+  # pg-admin:
+  #   image: dpage/pgadmin4:7
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@demo.com
+  #     - PGADMIN_DEFAULT_PASSWORD=admin
+  #     - PGADMIN_LISTEN_PORT=5500
+  #   ports:
+  #     - '127.0.0.1:5500:5500'
