@@ -5,38 +5,43 @@ volumes:
   storage_data:
 
 services:
-  # ============================================================================================== SHARED
-
   redis:
     restart: always
     image: "redis:alpine"
 
   db:
-    restart: always
+    restart: unless-stopped
     image: "postgres:alpine"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      # - POSTGRES_HOST_AUTH_METHOD=trust
-        - POSTGRES_USER=$DB_USER
-        - POSTGRES_PASSWORD=$DB_PASSWORD
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supersecret
+      POSTGRES_DB: expressPG
     ports:
-      - "127.0.0.1:5400:$DB_PORT"  
-  
+      - "4321:5432"
+    env_file:
+      - .env
 
   backend:
     stdin_open: true
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: backend-node
     depends_on:
       - db
+    volumes:
+      - ./:/app/
+    container_name: backend-node
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "postgresql://postgres:supersecret@db:5432/expressPG?schema=public"
+      NODE_ENV: development
     ports:
       - "3000:3000"
     restart: always
-    # volumes:
-    #   -backend:backend
+    
 
   # pg-admin:
   #   image: dpage/pgadmin4:7
@@ -45,4 +50,4 @@ services:
   #     - PGADMIN_DEFAULT_PASSWORD=admin
   #     - PGADMIN_LISTEN_PORT=5500
   #   ports:
-  #     - '127.0.0.1:5500:5500'
+  #     - 'postgres:5500:5500'

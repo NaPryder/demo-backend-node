@@ -1,17 +1,21 @@
-FROM node:16-alpine
+FROM node:16-bullseye-slim 
 
-WORKDIR /app/backend
+# Install openssl for Prisma
+# RUN apt-get update && apt-get install -y openssl
 
-ENV PORT=3000
+WORKDIR /app 
 
 COPY package*.json ./
-
-RUN npm install
-
+# RUN apt-get update && apt-get install -y openssl
+RUN npm ci
 COPY . .
 
-RUN npx prisma generate
+# prevent bcrypt error
+RUN npm uninstall bcrypt
+RUN npm i bcrypt
 
 EXPOSE 3000
 
-CMD npm run dev
+RUN npx prisma generate
+
+CMD [ "npm", "run", "dev" ]
