@@ -6,6 +6,13 @@
 
 ## Get start
 
+### add .env file
+
+SALT_ROUND=11
+PORT=3000
+ACCESS_TOKEN_SECRET_KEY="SECRET"
+REFRESH_TOKEN_SECRET_KEY="SECRET"
+
 ### demo-backend-node
 
 docker compose build
