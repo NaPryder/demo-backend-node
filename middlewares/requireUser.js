@@ -3,7 +3,7 @@
 const requireUser = (req, res, next) => {
   try {
     if (!req.user) {
-      throw new Error("Invalid sesstion")
+      throw new Error("Invalid session")
     }
 
     // found user

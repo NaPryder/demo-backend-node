@@ -29,9 +29,6 @@ async function generateRefreshToken(payload, user) {
           update: { token: refreshToken },
         },
       },
-    },
-    include: {
-      token: true
     }
   })
 
@@ -58,7 +55,7 @@ function setRefreshTokenToCookie(res, refreshToken, maxAge = 3600000) {
   res.cookie("refreshToken", refreshToken, {
     maxAge: maxAge,
     httpOnly: true,
-    secure: false,
+    secure: true,
   })
   return res
 }
@@ -67,7 +64,7 @@ function setAccessTokenCookie(res, accessToken, maxAge = 100000) {
   res.cookie("accessToken", accessToken, {
     maxAge: maxAge,
     httpOnly: true,
-    secure: false,
+    secure: true,
   })
   return res
 }

@@ -1,4 +1,4 @@
-const { verifyAccessToken, verifyRefreshToken, generateRefreshToken, setRefreshTokenToCookie } = require("../utils/tokenizations");
+const { verifyAccessToken, verifyRefreshToken, generateRefreshToken, setRefreshTokenToCookie, generateAccessToken } = require("../utils/tokenizations");
 
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
@@ -7,8 +7,11 @@ const prisma = new PrismaClient()
 const deserializeUser = async (req, res, next) => {
   console.log('req.cookies :>> ', req.cookies);
   const { accessToken, refreshToken } = req.cookies;
+  // const { access_token, refresh_token } = req.headers;
   console.log(' cookie accessToken :>> ', accessToken);
   console.log(' cookie refreshToken :>> ', refreshToken);
+  // console.log(' cookie access_token :>> ', access_token);
+  // console.log(' cookie refresh_token :>> ', refresh_token);
 
   // verify access token
   const decoded = await verifyAccessToken(accessToken)
@@ -25,7 +28,6 @@ const deserializeUser = async (req, res, next) => {
 
   // not found refreshToken
   if (!refreshToken) {
-    console.log("no rf");
     return next()
   }
 
@@ -58,14 +60,22 @@ const deserializeUser = async (req, res, next) => {
   }
 
   // valid refresh token >> create new refresh token
-  const payload = { username: tokenSession.user.username }
-  const newRefreshToken = generateRefreshToken(payload, tokenSession.user)
-  res = setRefreshTokenToCookie(res, newRefreshToken)
-  console.log('newRefreshToken :>> ', newRefreshToken);
-  req.user = {
+  const refreshTokenPayload = { username: tokenSession.user.username }
+  const newRefreshToken = generateRefreshToken(refreshTokenPayload, tokenSession.user)
+
+  // generate new access token
+  const accessTokenPayload = {
     username: tokenSession.user.username,
     role: tokenSession.user.role
   }
+
+  const newAccessToken = generateAccessToken(accessTokenPayload)
+
+  res = setRefreshTokenToCookie(res, newRefreshToken)
+  res = setAccessTokenCookie(res, newAccessToken)
+
+  req.user = accessTokenPayload
+
   next()
 }
 

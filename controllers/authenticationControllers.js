@@ -10,7 +10,7 @@ const createLoginSession = async (req, res, next) => {
   try {
     const { username, password } = req.body
 
-    // 
+
     // check user
     const user = await getUser({ username })
     if (!user) {
@@ -19,7 +19,7 @@ const createLoginSession = async (req, res, next) => {
 
     // compare hash password and request password
     if (!await comparePassword(password, user.password)) {
-      throw new Error("Invalid username or password2")
+      throw new Error("Invalid username or password")
     }
 
     // create refresh token session
@@ -27,9 +27,11 @@ const createLoginSession = async (req, res, next) => {
 
     // create access token
     const accessToken = generateAccessToken({
-      username,
+      username: username,
       role: user.role
     })
+
+    console.log('accessToken :>> ', accessToken);
 
     // set cookie
     res = setAccessTokenCookie(res, accessToken)

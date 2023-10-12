@@ -10,14 +10,18 @@
 
 SALT_ROUND=11
 PORT=3000
-ACCESS_TOKEN_SECRET_KEY="SECRET"
-REFRESH_TOKEN_SECRET_KEY="SECRET"
+ACCESS_TOKEN_SECRET_KEY="SECRET1"
+REFRESH_TOKEN_SECRET_KEY="SECRET2"
 
-### demo-backend-node
+### build container demo-backend-node
 
 docker compose build
 
 docker compose up -d
+
+or
+
+docker compose up --build -d
 
 ### exec to backend-node container for migrate
 

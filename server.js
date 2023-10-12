@@ -23,10 +23,10 @@ app.use(deserializeUser)
 app.get("/", async (req, res) => {
   const user = await prisma.user.findFirst()
   if (user) {
-    res.send(`<h1>rrrr .... Hello ${user.username}</h1>`);
+    res.send(`<h1>Hello ${user.username}</h1>`);
   }
   else {
-    res.send('no user. ssssss')
+    res.send('no user.')
   }
 });
 

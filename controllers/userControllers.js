@@ -49,6 +49,7 @@ const createUser = async (req, res, next) => {
       throw new Error("Invalid password and re-password")
     }
 
+    // check exist username
     const user = await getUser({ username: username })
     if (user) {
       throw Error("Username has already used.")
@@ -59,15 +60,16 @@ const createUser = async (req, res, next) => {
 
     const createdUser = await prisma.user.create({
       data: {
-        username,
+        username: username,
         password: hashedPassword
       }
     })
 
-    console.log('createUser :>> ', createdUser);
-    res.status(201).json({ username, id: createdUser.id, role: createdUser.role });
-    // res.status(201).json({ username: createUser.username });
-    // res.status(201).json({ hashedPassword })
+    res.status(201).json({
+      username,
+      id: createdUser.id,
+      role: createdUser.role
+    });
   } catch (error) {
     next(error)
   }
