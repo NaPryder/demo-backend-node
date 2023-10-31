@@ -11,6 +11,8 @@ const port = process.env.PORT;
 // import routes
 const userRoutes = require("./routes/userRoutes")
 const authenticataionRoutes = require("./routes/authenticationRoutes")
+const userInfoRoutes = require("./routes/userInfoRoutes")
+const skillSetRoutes = require("./routes/skillSetRoutes")
 const { logError, handleError } = require("./errorsHandlers/errorHandlers");
 const { deserializeUser } = require("./middlewares/deserializeUser");
 
@@ -28,12 +30,15 @@ app.get("/", async (req, res) => {
   else {
     res.send('no user.')
   }
+
 });
 
 
 // Routes
 app.use("/user", userRoutes)
 app.use("/auth", authenticataionRoutes)
+app.use("/user-info", userInfoRoutes)
+app.use("/skill-set", skillSetRoutes)
 // app.use("/blog", userRoutes)
 
 

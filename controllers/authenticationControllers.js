@@ -62,5 +62,5 @@ const deleteLoginSession = (req, res, next) => {
 
 module.exports = {
   createLoginSession,
-  deleteLoginSession
+  deleteLoginSession,
 }

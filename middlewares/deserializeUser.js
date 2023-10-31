@@ -1,21 +1,14 @@
-const { verifyAccessToken, verifyRefreshToken, generateRefreshToken, setRefreshTokenToCookie, generateAccessToken } = require("../utils/tokenizations");
+const { verifyAccessToken, verifyRefreshToken, generateRefreshToken, setRefreshTokenToCookie, generateAccessToken, setAccessTokenCookie } = require("../utils/tokenizations");
 
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 
 const deserializeUser = async (req, res, next) => {
-  console.log('req.cookies :>> ', req.cookies);
   const { accessToken, refreshToken } = req.cookies;
-  // const { access_token, refresh_token } = req.headers;
-  console.log(' cookie accessToken :>> ', accessToken);
-  console.log(' cookie refreshToken :>> ', refreshToken);
-  // console.log(' cookie access_token :>> ', access_token);
-  // console.log(' cookie refresh_token :>> ', refresh_token);
 
   // verify access token
   const decoded = await verifyAccessToken(accessToken)
-  console.log('decoded :>> ', decoded);
 
   // valid access token
   if (decoded) {
@@ -33,7 +26,6 @@ const deserializeUser = async (req, res, next) => {
 
   // verify refresh token
   const refresh = await verifyRefreshToken(refreshToken)
-  console.log('found rf:>> ', refresh);
   if (!refresh) {
     return next() // invalid refresh token
   }
@@ -71,8 +63,8 @@ const deserializeUser = async (req, res, next) => {
 
   const newAccessToken = generateAccessToken(accessTokenPayload)
 
-  res = setRefreshTokenToCookie(res, newRefreshToken)
-  res = setAccessTokenCookie(res, newAccessToken)
+  setRefreshTokenToCookie(res, newRefreshToken)
+  setAccessTokenCookie(res, newAccessToken)
 
   req.user = accessTokenPayload
 

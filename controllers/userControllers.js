@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
-const { encryptPassword } = require('../utils/bcrypts')
+const { encryptPassword, comparePassword } = require('../utils/bcrypts')
 const { getUser } = require('../utils/ormHelpers')
 const prisma = new PrismaClient()
 
@@ -97,47 +97,103 @@ const retrieveUniqueUser = async (req, res, next) => {
   }
 }
 
-// update
+// update password
 const updateUserPassword = async (req, res, next) => {
   try {
-    const { userId } = req
-    const { username, oldPassword, password, rePassword } = req.body;
-    console.log('userId :>> ', userId);
 
+    const { username, oldPassword, newPassword, reNewPassword } = req.body;
+    console.log('req.user :>> ', req.user);
+    console.log('username :>> ', username);
+
+    // validation
+    if (username != req.user.username) {
+      throw new Error("Unauthorized")
+    }
+    if (newPassword !== reNewPassword) {
+      throw new Error("Mismatch password")
+    }
+    else if (newPassword == oldPassword) {
+      throw new Error("Invalid new-password")
+    }
+
+    // get user
     const user = await getUser({
       username: username,
-      id: userId,
     })
-
-    if (password !== rePassword) {
-      res.status(404).send("mismatch password")
-    }
-    else if (!user) {
-      throw new Error("invalid user")
-    }
-    else if (user.password !== oldPassword) {
-      throw new Error("invalid old password")
+    if (!user) {
+      throw new Error("Invalid username or password1")
     }
 
+    // compare old password
+    if (!await comparePassword(oldPassword, user.password)) {
+      throw new Error("Invalid username or password2")
+    }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        password: password,
+    // encrypt password
+    const hashedPassword = await encryptPassword(newPassword)
+
+    // update new password to db
+    await prisma.user.update({
+      where: {
+        username: username
       },
+      data: {
+        password: hashedPassword
+      }
     })
+    res.status(201).send('ok')
 
-    console.log('updatedUser :>> ', updatedUser);
-
-    res.status(201).json({
-      ...updatedUser,
-      status: "success",
-      log: "update user successfully",
-    });
   } catch (error) {
     next(error)
   }
 }
+
+// reset password
+const resetPassword = async (req, res, next) => {
+  try {
+
+    // get user
+    const user = await getUser({
+      username: req.user.username,
+    })
+    if (!user) {
+      throw Error("Invalid user")
+    }
+
+    // random
+    let newPassword = (Math.random() + 1).toString(36).substring(7);
+
+    // encrypt password
+    const hashedPassword = await encryptPassword(newPassword)
+
+    // update new password to db
+    await prisma.user.update({
+      where: {
+        username: req.user.username
+      },
+      data: {
+        password: hashedPassword
+      }
+    })
+
+    res.send({ newPassword })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// forget password
+const forgetPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    console.log('email :>> ', email);
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+
 
 // delete
 const deleteUser = (req, res) => {
@@ -155,5 +211,7 @@ module.exports = {
   createUser,
   getUserRoles,
   verifyUserId,
-  displayUserInfo
+  displayUserInfo,
+  resetPassword,
+  forgetPassword,
 }

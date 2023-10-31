@@ -1,7 +1,12 @@
 const express = require("express");
-const { createUserInfo } = require("../controllers/userInfoControllers");
+const { editUserInfo, getUserInfo } = require("../controllers/userInfoControllers");
+const { requireUser } = require("../middlewares/requireUser");
 const router = express.Router()
 
 
-// create user info
-router.post('/', createUserInfo)
+// edit user info
+router.post('/', requireUser, editUserInfo)
+
+router.get('/', requireUser, getUserInfo)
+
+module.exports = router
